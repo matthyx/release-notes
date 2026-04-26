@@ -1,0 +1,46 @@
+# Edge-case fixture for the values parser.
+# Covers: tree-suffix URLs, hyphen separators, sourceless components,
+# depth-3 image blocks (emitted), and depth-4 image blocks (skipped).
+
+# foo: source URL with /tree/main suffix and (public repo) annotation.
+foo:
+  image:
+    # -- source code: https://github.com/kubescape/foo/tree/main/bar (public repo)
+    repository: quay.io/kubescape/foo
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+
+# baz: hyphen-separator (`source code -`) form.
+baz:
+  image:
+    # source code - https://github.com/kubescape/baz
+    repository: quay.io/kubescape/baz
+    tag: v0.1.0
+
+# busybox: sourceless component (no source-code comment).
+busybox:
+  image:
+    repository: docker.io/library/busybox
+    tag: 1.36.1
+
+# nodeAgent has a depth-3 image block (jitter container) that is emitted by
+# the parser; it is filtered downstream because old/new tags are both `latest`.
+nodeAgent:
+  image:
+    # -- source code: https://github.com/kubescape/node-agent
+    repository: quay.io/kubescape/node-agent
+    tag: v0.3.94
+  startupJitterContainer:
+    enabled: false
+    image:
+      repository: busybox
+      tag: latest
+
+# deepNest has a depth-4 image block which the parser must skip.
+deepNest:
+  level1:
+    level2:
+      image:
+        # -- source code: https://github.com/kubescape/should-be-skipped
+        repository: quay.io/kubescape/should-be-skipped
+        tag: v0.0.1
